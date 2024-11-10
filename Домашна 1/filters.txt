@@ -1,0 +1,89 @@
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import pandas as pd
+
+
+start_time = time.time()
+
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+driver.get('https://www.mse.mk/mk/stats/symbolhistory/REPL')
+soup = BeautifulSoup(driver.page_source, 'html.parser')
+options = soup.select(".form-control option")
+issuer_codes = [option.text for option in options if option.text.isalpha()]
+
+def collect_data_for_issuer(issuer_code, start_year, end_year):
+    data = []
+    for year in range(start_year, end_year + 1):
+        try:
+            # Reload the target page to reset form selections
+            driver.get('https://www.mse.mk/mk/stats/symbolhistory/REPL')
+            wait = WebDriverWait(driver, 20)
+
+            date_inputFrom = wait.until(EC.presence_of_element_located((By.ID, "FromDate")))
+            date_inputTo = driver.find_element(By.ID, "ToDate")
+            date_inputFrom.clear()
+            date_inputTo.clear()
+            date_inputFrom.send_keys(f"01.01.{year}")
+            date_inputTo.send_keys(f"31.12.{year}")
+            time.sleep(3)
+            select_elementCode = wait.until(EC.presence_of_element_located((By.ID, "Code")))
+            select = Select(select_elementCode)
+            select.select_by_value(issuer_code)
+
+            button = driver.find_element(By.CLASS_NAME, "btn-primary-sm")
+            button.click()
+
+            table = wait.until(EC.presence_of_element_located((By.ID, "resultsTable")))
+
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            table_rows = soup.select("#resultsTable tbody tr")
+
+            for row in table_rows:
+                columns = row.select("td")
+                if len(columns) > 0:  # Check if the row contains data
+                    data_dict = {
+                        "Issuer_Code": issuer_code,
+                        "Date": columns[0].text,
+                        "Last_Price": columns[1].text,
+                        "Max_Price": columns[2].text,
+                        "Min_Price": columns[3].text,
+                        "Average_Price": columns[4].text,
+                        "Percent": columns[5].text,
+                        "Quantity": columns[6].text,
+                        "Traffic": columns[7].text,
+                        "Sum_Traffic": columns[8].text
+                    }
+                    data.append(data_dict)
+        except Exception as e:
+            print(f"Error for issuer {issuer_code} in year {year}: {e}")
+            continue
+
+        time.sleep(0.5)
+
+    return data
+
+for issuer_code in issuer_codes:
+    print(f"Collecting data for issuer {issuer_code}")
+
+    issuer_data = collect_data_for_issuer(issuer_code, 2014, 2024)
+
+    if issuer_data:  # Only save if data was collected
+        issuer_df = pd.DataFrame(issuer_data)
+        issuer_df.to_csv(f"stock_data_{issuer_code}.csv", index=False)
+        print(f"Data for {issuer_code} saved to stock_data_{issuer_code}.csv")
+    else:
+        print(f"No data collected for {issuer_code}")
+
+driver.quit()
