@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Техничка Анализа и Прогнози{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="text-center text-primary mb-4">Техничка Анализа за {{ issuer }}</h1>
+
+    <form method="POST" id="issuerForm" class="d-flex justify-content-center mb-4">
+        <label for="issuer" class="me-2">Изберете издавач:</label>
+        <select name="issuer" id="issuer" class="form-select me-3">
+            {% for issuer_name in issuers %}
+            <option value="{{ issuer_name }}" {% if issuer_name == issuer %}selected{% endif %}>
+                {{ issuer_name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Генерирај Граф</button>
+    </form>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            {% if graph_base64 %}
+            <h3 class="text-center text-secondary">График на Индикаторите</h3>
+            <img src="data:image/png;base64,{{ graph_base64 }}" alt="Technical Analysis Graph" class="img-fluid shadow rounded">
+            {% else %}
+            <p class="text-muted text-center">Графиконот не е достапен за избраниот издавач.</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {% if indicators %}
+            <h3 class="text-center text-secondary">Индикатори</h3>
+            <table class="table table-hover table-striped shadow">
+                <thead>
+                <tr class="bg-primary text-white">
+                    <th>Индикатор</th>
+                    <th>Вредност</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for label, value in {
+                'SMA 20': indicators.SMA_20,
+                'SMA 50': indicators.SMA_50,
+                'EMA 20': indicators.EMA_20,
+                'EMA 50': indicators.EMA_50,
+                'RSI': indicators.RSI,
+                'MACD': indicators.MACD,
+                'Горен Болингер Бенд': indicators.Bollinger_Upper,
+                'Долен Болингер Бенд': indicators.Bollinger_Lower
+                }.items() %}
+                <tr>
+                    <td>{{ label }}</td>
+                    <td>{{ value if value not in [None, 'NaN'] else 'Недостиг на податоци' }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h3 class="text-center text-success">Предвидени Цени</h3>
+        <table class="table table-bordered shadow">
+            <thead>
+            <tr class="bg-success text-white">
+                <th>Индикатор</th>
+                <th>1 Ден</th>
+                <th>1 Недела</th>
+                <th>1 Месец</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for indicator, key in {
+            'SMA 20': 'SMA_20',
+            'SMA 50': 'SMA_50',
+            'EMA 20': 'EMA_20',
+            'EMA 50': 'EMA_50',
+            'RSI': 'RSI',
+            'MACD': 'MACD',
+            'Горен Болингер Бенд': 'Bollinger_Upper',
+            'Долен Болингер Бенд': 'Bollinger_Lower'
+            }.items() %}
+            <tr>
+                <td>{{ indicator }}</td>
+                <td>{{ predicted_prices.get('1_day', {}).get(key, 'Недостиг на податоци') }}</td>
+                <td>{{ predicted_prices.get('1_week', {}).get(key, 'Недостиг на податоци') }}</td>
+                <td>{{ predicted_prices.get('1_month', {}).get(key, 'Недостиг на податоци') }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-5">
+        <h4>Објаснувања на Индикаторите</h4>
+        <ul>
+            <li><strong>SMA:</strong> Едноставен движеcки просек кој го мери просекот на цените за одреден временски период.</li>
+            <li><strong>EMA:</strong> Експоненцијален движеcки просек кој дава поголема тежина на поновите податоци.</li>
+            <li><strong>RSI:</strong> Индикатор кој го мери темпото и јачината на ценовните промени.</li>
+            <li><strong>MACD:</strong> Индикатор за откривање на насока и сила на трендот.</li>
+            <li><strong>Болингер Бендови:</strong> Мерки за нестабилност кои покажуваат потенцијални нивоа на поддршка или отпор.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('table tbody td').forEach(function (cell) {
+            if (['NaN', 'undefined', ''].includes(cell.textContent.trim())) {
+                cell.textContent = 'Недостиг на податоци';
+            }
+        });
+    });
+</script>
+{% endblock %}

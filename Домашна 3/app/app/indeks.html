@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Анализа на Македонска Берза{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="mb-3">Преглед на Берза</h1>
+    <p class="text-muted">Проверете ги најновите податоци за денешниот пазар.</p>
+</div>
+<div class="d-flex justify-content-center mb-3">
+    <button id="fetch-data-btn" class="btn btn-primary">Прикажи Податоци</button>
+</div>
+<div id="alert-no-data" class="alert alert-danger mt-3 d-none">
+    Не се достапни податоци за денес.
+</div>
+<div class="table-responsive mt-3">
+    <table id="market-data-table" class="table table-striped table-sm text-center">
+        <thead class="table-light"></thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(function () {
+        $('#fetch-data-btn').on('click', function () {
+            // Reset the table and alerts
+            $('#alert-no-data').addClass('d-none');
+            $('#market-data-table thead').empty();
+            $('#market-data-table tbody').empty();
+
+            // Request today's data
+            $.getJSON('/get_todays_data', function (response) {
+                if (!response || response.length === 0) {
+                    // Display an alert if no data exists
+                    $('#alert-no-data').removeClass('d-none');
+                } else {
+                    // Render the table headers
+                    const headers = [
+                        'Име на Издавач',
+                        'Датум',
+                        'Цена на Последна Трансакција',
+                        'Макс.',
+                        'Мин.',
+                        'Просечна Цена',
+                        'Промена во %',
+                        'Количина',
+                        'Промет во BEST (Ден.)',
+                        'Вкупен Промет (Ден.)'
+                    ];
+                    const headerRow = $('<tr>').addClass('table-primary');
+                    headers.forEach(header => headerRow.append($('<th>').text(header)));
+                    $('#market-data-table thead').append(headerRow);
+
+                    // Render the table body
+                    response.forEach(record => {
+                        const changePercent = parseFloat(record['Промена во %'].replace(',', '.'));
+                        const rowColor = changePercent > 0 ? 'green' : changePercent < 0 ? 'red' : 'gray';
+                        const row = $('<tr>').css('color', rowColor);
+
+                        headers.forEach(header => {
+                            row.append($('<td>').text(record[header] || 'N/A'));
+                        });
+
+                        $('#market-data-table tbody').append(row);
+                    });
+                }
+            }).fail(function () {
+                alert('Не успеавме да ги преземеме податоците. Обидете се повторно.');
+            });
+        });
+    });
+</script>
+{% endblock %}
