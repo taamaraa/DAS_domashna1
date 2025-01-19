@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Прогноза со LSTM Модел{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-5 text-primary">LSTM Анализа на Акции</h1>
+        <p class="lead text-muted">Одберете компанија и времетраење за да ја добиете прогнозата за движењето на цените на акциите.</p>
+    </div>
+
+    <form method="POST" class="p-4 border rounded shadow bg-light">
+        <h4 class="mb-4 text-center text-dark">Параметри за Прогноза</h4>
+
+        <div class="form-group mb-3">
+            <label for="issuer" class="form-label">Изберете Компанија:</label>
+            <select name="issuer" id="issuer" class="form-control shadow-sm" required>
+                <option value="" disabled selected>-- Одберете --</option>
+                {% for issuer in issuers %}
+                <option value="{{ issuer }}" {% if issuer == selected_issuer %}selected{% endif %}>
+                    {{ issuer }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="prediction_type" class="form-label">Времетраење на Прогноза:</label>
+            <select name="prediction_type" id="prediction_type" class="form-control shadow-sm" required>
+                <option value="short-term" {% if prediction_type == 'short-term' %}selected{% endif %}>Краткорочна</option>
+                <option value="medium-term" {% if prediction_type == 'medium-term' %}selected{% endif %}>Среднорочна</option>
+            </select>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Генерирај Прогноза</button>
+        </div>
+    </form>
+
+    {% if missing_issuer %}
+    <div class="alert alert-danger text-center mt-4" role="alert">
+        Ве молиме, изберете компанија за да продолжите.
+    </div>
+    {% endif %}
+
+    {% if prediction %}
+    <div class="mt-5">
+        <div class="row justify-content-around g-4">
+
+            <div class="col-md-5 p-4 shadow rounded bg-white">
+                <h3 class="text-success">Резултати за {{ selected_issuer }}</h3>
+                <p><strong>Тип на Прогноза:</strong>
+                    {{ prediction_type == 'short-term' and 'Краткорочна' or 'Среднорочна' }}
+                </p>
+                <ul class="list-group">
+                    {% if prediction_type == 'short-term' %}
+                    <li class="list-group-item">1 Недела: {{ prediction['1 Week'] }}</li>
+                    <li class="list-group-item">1 Месец: {{ prediction['1 Month'] }}</li>
+                    <li class="list-group-item">3 Месеци: {{ prediction['3 Months'] }}</li>
+                    {% else %}
+                    <li class="list-group-item">6 Месеци: {{ prediction['6 Months'] }}</li>
+                    <li class="list-group-item">9 Месеци: {{ prediction['9 Months'] }}</li>
+                    <li class="list-group-item">1 Година: {{ prediction['1 Year'] }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="col-md-5 p-4 shadow rounded bg-white text-center">
+                <h3 class="text-primary">Графикон на Прогноза</h3>
+                {% if prediction.graph %}
+                <img src="data:image/png;base64,{{ prediction['graph'] }}" alt="Прогнозен Графикон" class="img-fluid rounded shadow">
+                {% else %}
+                <p class="text-muted">Нема достапен графикон.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-5">
+        <h4 class="text-dark">Што е LSTM?</h4>
+        <p class="text-secondary">
+            <strong>LSTM (Long Short-Term Memory)</strong> е специјален тип на невронска мрежа која обработува податоци што се менуваат со време.
+            Оваа технологија е идеална за предвидување на движењата на акции и други временски низи.
+        </p>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if ("{{ selected_issuer }}" === "") {
+            alert('Ве молиме, одберете компанија пред да продолжите.');
+        }
+    });
+</script>
+{% endblock %}

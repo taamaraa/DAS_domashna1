@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  gateway-service:
+    build:
+      context: ./gateway-service
+    ports:
+      - "8080:8080"
+
+  analyze-service:
+    build:
+      context: ./analyze-service
+    ports:
+      - "8081:8081"
+
+  results-service:
+    build:
+      context: ./results-service
+    ports:
+      - "8082:8082"

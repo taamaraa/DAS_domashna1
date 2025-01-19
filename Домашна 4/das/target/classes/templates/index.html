@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Stock Analysis Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-light">
+
+<header class="bg-primary text-white py-3 shadow">
+    <div class="container">
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <a class="navbar-brand fw-bold" href="/static">Stock Analysis</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/tech-analysis">Technical Analysis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/fund-analysis">Fundamental Analysis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/predict-lstm">LSTM Forecast</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about-us">About Us</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-primary">Welcome to the Stock Analysis Platform</h1>
+        <p class="lead text-muted">Your one-stop solution for technical and fundamental stock analysis and AI-powered price forecasts.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">Technical Analysis</h5>
+                    <p class="card-text">Analyze stock price trends and patterns with advanced technical indicators.</p>
+                    <a href="/tech-analysis" class="btn btn-outline-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">Fundamental Analysis</h5>
+                    <p class="card-text">Dive deep into financial statements and company performance data.</p>
+                    <a href="/fund-analysis" class="btn btn-outline-primary">Explore</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">AI-Powered Forecasts</h5>
+                    <p class="card-text">Use cutting-edge LSTM models to predict future stock prices.</p>
+                    <a href="/predict-lstm" class="btn btn-outline-primary">Get Forecast</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-primary text-white py-3">
+    <div class="container text-center">
+        <small>&copy; 2024 Stock Analysis Platform. All rights reserved.</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
